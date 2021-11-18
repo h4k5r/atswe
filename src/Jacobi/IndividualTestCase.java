@@ -1,6 +1,5 @@
 package Jacobi;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,8 +9,9 @@ import java.util.List;
 public class IndividualTestCase implements Comparable<IndividualTestCase> {
     int[] testCase;
     double fitness;
-    static int K = 1000;
+    static int K = 100;
     int n, k;
+    double mutationRate = 0.6;
     List<String> targetsString = new ArrayList(Arrays.asList("t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"));
 
     private void setFalse() {
@@ -49,12 +49,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
     }
 
     static double normalize(int d) {
-        double normalized = 1 - Math.pow(1.001, -d);
-        //-(-1.13216546E145)
-//        if(Math.pow(1.001,-d) == Double.POSITIVE_INFINITY) {
-//            return d;
-//        }
-        return normalized;
+        return 1 - Math.pow(1.001, -d);
     }
 
     double singleTargetFitness(String target, int n, int k) {
@@ -128,7 +123,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
 
 
     private int jacobiSymbol(int k, int n) {
-        this.fitness += this.singleTargetFitness("t0", n, k);
+        this.fitness += this.singleTargetFitness("t0", k, n);
         //t0
         this.targets[0] = true;
         //10011001
@@ -139,7 +134,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
 //            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
             return -1;
         }
-        this.fitness += this.singleTargetFitness("t1", n, k);
+        this.fitness += this.singleTargetFitness("t1", k, n);
         k %= n;
         int jacobi = 1;
         while (k > 0) {
@@ -149,48 +144,45 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
                 //t3
                 this.targets[3] = true;
                 k /= 2;
-                this.k = k;
                 int r = n % 8;
                 if (r == 3 || r == 5) {
                     //t4
                     this.targets[4] = true;
                     jacobi = -jacobi;
                 }
-                this.fitness += this.singleTargetFitness("t4", n, k);
+                this.fitness += this.singleTargetFitness("t4", k, n);
             }
-            this.fitness += this.singleTargetFitness("t3", n, k);
+            this.fitness += this.singleTargetFitness("t3", k, n);
             //n,k
             int temp = n;
             n = k;
             k = temp;
-            this.k = k;
-            this.n = n;
             //k,n
             if (k % 4 == 3 && n % 4 == 3) {
                 //t5
                 this.targets[5] = true;
                 jacobi = -jacobi;
             }
-            this.fitness += this.singleTargetFitness("t5", n, k);
+            this.fitness += this.singleTargetFitness("t5", k, n);
             k %= n;
         }
-        this.fitness += this.singleTargetFitness("t2", n, k);
+        this.fitness += this.singleTargetFitness("t2", k, n);
         if (n == 1) {
             //t6
             this.targets[6] = true;
             return jacobi;
         }
-        this.fitness += this.singleTargetFitness("t6", n, k);
+        this.fitness += this.singleTargetFitness("t6", k, n);
         //t7
         this.targets[7] = true;
-        this.fitness += this.singleTargetFitness("t7", n, k);
+        this.fitness += this.singleTargetFitness("t7", k, n);
         return 0;
     }
 
     private static int[] testcase() {
 //        -2147483647
-        int n = generateRandom(-65000, 65000);
-        int k = generateRandom(-65000, 65000);
+        int n = generateRandom(-2147483647, 2147483647);
+        int k = generateRandom(-2147483647, 2147483647);
         return new int[]{n, k};
     }
 
@@ -248,10 +240,13 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
     }
 
     public void mutate() {
-        if (generateRandom(0, 2) == 1) {
-            this.testCase[1] = generateRandom(-2147483647, 2147483647);
-        } else {
-            this.testCase[0] = generateRandom(-2147483647, 2147483647);
+        double mutationRateRate = Math.random();
+        if (mutationRateRate < this.mutationRate) {
+            if (generateRandom(0, 2) == 1) {
+                this.testCase[1] = generateRandom(-2147483647, 2147483647);
+            } else {
+                this.testCase[0] = generateRandom(-2147483647, 2147483647);
+            }
         }
     }
 
@@ -264,9 +259,10 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         List<IndividualTestCase> Q3 = population.subList((int) Math.ceil((population.size() - 1) * 0.25),
                 (int) Math.ceil((population.size() - 1) * 0.5));
         for (int i = 0; i < Q1.size(); i++) {
-            nextGen.addAll(crossOver(Q3.get(i), Q1.get(i)));
             nextGen.addAll(crossOver(Q3.get(i), Q2.get(i)));
         }
+        nextGen.addAll(Q1);
+        nextGen.addAll(Q3);
         Collections.sort(nextGen);
         return nextGen;
     }

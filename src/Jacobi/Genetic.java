@@ -1,7 +1,6 @@
 package Jacobi;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,13 +13,15 @@ public class Genetic {
         int populationSize = 500;
         List<IndividualTestCase> population = generatePopulation(populationSize);
         Collections.sort(population);
-
         while (true) {
             System.out.println("Generation: " + bigInteger);
             population = generateNextGen(population);
             System.out.println("Best: " + population.get(populationSize - 1).getFitness());
             System.out.println("Worst: " + population.get(0).getFitness());
             bigInteger = bigInteger.add(BigInteger.ONE);
+            if (population.get(populationSize - 1).getFitness() == 0) {
+                return;
+            }
         }
     }
 }
