@@ -12,6 +12,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
     static int K = 100;
     int n, k;
     double mutationRate = 0.6;
+    public boolean exceptionTriggered = false;
     List<String> targetsString = new ArrayList(Arrays.asList("t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7"));
 
     private void setFalse() {
@@ -39,7 +40,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         this.jacobiSymbol(this.testCase[0], this.testCase[1]);
     }
 
-    boolean[] targets = new boolean[8];
+    public boolean[] targets = new boolean[8];
 
     int[] branch = new int[8];
 
@@ -130,9 +131,18 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         if (k < 0 && n % 2 == 0) {
             //t1
             this.targets[1] = true;
+            this.exceptionTriggered = true;
 //            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
 //            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
-            return -1;
+            this.fitness += this.singleTargetFitness("t2", k, n);
+            this.fitness += this.singleTargetFitness("t3", k, n);
+            this.fitness += this.singleTargetFitness("t4", k, n);
+            this.fitness += this.singleTargetFitness("t5", k, n);
+            this.fitness += this.singleTargetFitness("t6", k, n);
+            this.fitness += this.singleTargetFitness("t7", k, n);
+
+
+            return -2;
         }
         this.fitness += this.singleTargetFitness("t1", k, n);
         k %= n;
@@ -167,6 +177,9 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
             k %= n;
         }
         this.fitness += this.singleTargetFitness("t2", k, n);
+        this.fitness += this.singleTargetFitness("t3", k, n);
+        this.fitness += this.singleTargetFitness("t4", k, n);
+        this.fitness += this.singleTargetFitness("t5", k, n);
         if (n == 1) {
             //t6
             this.targets[6] = true;
