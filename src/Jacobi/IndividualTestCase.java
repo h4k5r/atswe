@@ -9,7 +9,8 @@ import java.util.List;
 public class IndividualTestCase implements Comparable<IndividualTestCase> {
     int[] testCase;
     double fitness;
-    static int K = 100;
+    String target;
+    static int K = 10;
     int n, k;
     double mutationRate = 0.6;
     public boolean exceptionTriggered = false;
@@ -36,8 +37,34 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         return fitness;
     }
 
-    public void calcFitness() {
-        this.jacobiSymbol(this.testCase[0], this.testCase[1]);
+    public void calcFitness(String target) {
+        switch (target) {
+            case "t0":
+                break;
+            case "t1":
+                jacobiForT1(this.testCase[0], this.testCase[1]);
+                break;
+            case "t2":
+                jacobiForT2(this.testCase[0], this.testCase[1]);
+                break;
+            case "t3":
+                jacobiForT3(this.testCase[0], this.testCase[1]);
+                break;
+            case "t4":
+                jacobiForT4(this.testCase[0], this.testCase[1]);
+                break;
+            case "t5":
+                jacobiForT5(this.testCase[0], this.testCase[1]);
+                break;
+            case "t6":
+                jacobiForT6(this.testCase[0], this.testCase[1]);
+                break;
+            case "t7":
+                jacobiForT7(this.testCase[0], this.testCase[1]);
+                break;
+            default:
+                break;
+        }
     }
 
     public boolean[] targets = new boolean[8];
@@ -75,6 +102,9 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
                 if (!this.targets[3] && this.targets[2]) {
                     approachLevel = 1;
                     branchDistance = Math.abs(k % 2 - 0) + K;
+                } else if (!this.targets[2]) {
+                    approachLevel = 2;
+                    branchDistance = Math.abs(0 - k) + K;
                 }
                 break;
             case "t4":
@@ -89,8 +119,8 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
                 } else if (!this.targets[2]) {
                     approachLevel = 2;
                     branchDistance = Math.abs(0 - k) + K;
-
                 }
+
                 break;
             case "t5":
                 if (!this.targets[5] && this.targets[2]) {
@@ -112,16 +142,289 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
             case "t7":
                 if (!this.targets[7]) {
                     approachLevel = 0;
-                    branchDistance = 0 + K;
+                    branchDistance = Math.abs(1 - n) + K;
                 }
                 break;
             default:
                 break;
         }
         //normalize
+//        System.out.println(approachLevel+normalize(branchDistance));
         return approachLevel + normalize(branchDistance);
     }
 
+
+    int jacobiForT1(int n, int k) {
+        this.targets[0] = true;
+        if (k < 0 && n % 2 == 0) {
+            //t1
+            this.targets[1] = true;
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+            return -2;
+        }
+        this.fitness = this.singleTargetFitness("t1", n, k);
+        try {
+            k %= n;
+        }
+        catch (ArithmeticException e) {
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+            return -2;
+        }
+        int jacobi = 1;
+        while (k > 0) {
+            while (k % 2 == 0) {
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                this.targets[5] = true;
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        if (n == 1) {
+            this.targets[6] = true;
+            return jacobi;
+        }
+        this.targets[7] = true;
+        return 0;
+    }
+
+    int jacobiForT2(int n, int k) {
+        if (k < 0 && n % 2 == 0) {
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+        }
+        k %= n;
+        int jacobi = 1;
+        while (k > 0) {
+            //t2
+            this.targets[2] = true;
+            while (k % 2 == 0) {
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        this.fitness = this.singleTargetFitness("t2", n, k);
+        if (n == 1) {
+            return jacobi;
+        }
+        return 0;
+    }
+
+    int jacobiForT3(int n, int k) {
+        if (k < 0 && n % 2 == 0) {
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+            this.fitness = this.singleTargetFitness("t3", n, k);
+        }
+        k %= n;
+        int jacobi = 1;
+        while (k > 0) {
+            //t2
+            this.targets[2] = true;
+            while (k % 2 == 0) {
+                //t3
+                this.targets[3] = true;
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            this.fitness=this.singleTargetFitness("t3", n, k);
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        if (n == 1) {
+            return jacobi;
+        }
+        //t7
+        this.targets[7] = true;
+        return 0;
+    }
+
+    int jacobiForT4(int n, int k) {
+        if (k < 0 && n % 2 == 0) {
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+        }
+        k %= n;
+        int jacobi = 1;
+        while (k > 0) {
+            //t2
+            this.targets[2] = true;
+            while (k % 2 == 0) {
+                //t3
+                this.targets[3] = true;
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    //t4
+                    this.targets[4] = true;
+                    jacobi = -jacobi;
+                }
+                this.fitness = this.singleTargetFitness("t4", n, k);
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        if (n == 1) {
+            return jacobi;
+        }
+        return 0;
+    }
+
+    int jacobiForT5(int n, int k) {
+        if (k < 0 && n % 2 == 0) {
+            this.targets[1] = true;
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+            return -2;
+        }
+        try {
+            k %= n;
+        }
+        catch (ArithmeticException e) {
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+            return -2;
+        }
+        int jacobi = 1;
+        while (k > 0) {
+            while (k % 2 == 0) {
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                //t5
+                this.targets[5] = true;
+                jacobi = -jacobi;
+            }
+            this.fitness = this.singleTargetFitness("t5", n, k);
+            k %= n;
+        }
+        if (n == 1) {
+            return jacobi;
+        }
+        return 0;
+    }
+
+    int jacobiForT6(int n, int k) {
+        this.targets[0] = true;
+        if (k < 0 && n % 2 == 0) {
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+            return -2;
+        }
+        try {
+            k %= n;
+        }
+        catch (ArithmeticException e) {
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+            return -2;
+        }
+        int jacobi = 1;
+        while (k > 0) {
+            while (k % 2 == 0) {
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        if (n == 1) {
+            //t6
+            this.targets[6] = true;
+            return jacobi;
+        }
+        this.fitness = this.singleTargetFitness("t6", n, k);
+        return 0;
+    }
+
+    int jacobiForT7(int n, int k) {
+        if (k < 0 && n % 2 == 0) {
+            this.exceptionTriggered = true;
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+//            throw new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n);
+            return -2;
+        }
+        try {
+            k %= n;
+        }
+        catch (ArithmeticException e) {
+//            System.out.println(new IllegalArgumentException("Invalid value. k = " + k + ", n = " + n));
+            return -2;
+        }
+        int jacobi = 1;
+        while (k > 0) {
+            while (k % 2 == 0) {
+                k /= 2;
+                int r = n % 8;
+                if (r == 3 || r == 5) {
+                    jacobi = -jacobi;
+                }
+            }
+            int temp = n;
+            n = k;
+            k = temp;
+            if (k % 4 == 3 && n % 4 == 3) {
+                jacobi = -jacobi;
+            }
+            k %= n;
+        }
+        if (n == 1) {
+            this.fitness = this.singleTargetFitness("t7", n, k);
+            return jacobi;
+        }
+        this.targets[7] = true;
+        return 0;
+    }
 
     private int jacobiSymbol(int k, int n) {
         this.fitness += this.singleTargetFitness("t0", k, n);
@@ -192,18 +495,18 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         return 0;
     }
 
-    private static int[] testcase() {
+    public static int[] testcase() {
 //        -2147483647
         int n = generateRandom(-2147483647, 2147483647);
         int k = generateRandom(-2147483647, 2147483647);
         return new int[]{n, k};
     }
 
-    public static List<IndividualTestCase> generatePopulation(int size) {
+    public static List<IndividualTestCase> generatePopulation(int size,String target) {
         List<IndividualTestCase> population = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             IndividualTestCase individualTestCase = new IndividualTestCase(testcase());
-            individualTestCase.calcFitness();
+            individualTestCase.calcFitness(target);
             population.add(individualTestCase);
         }
         return population;
@@ -229,8 +532,6 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         IndividualTestCase child2 = new IndividualTestCase(child2Testcase);
         child1.mutate();
         child2.mutate();
-        child1.calcFitness();
-        child2.calcFitness();
         children.add(child1);
         children.add(child2);
         return children;
@@ -263,7 +564,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         }
     }
 
-    public static List<IndividualTestCase> generateNextGen(List<IndividualTestCase> population) {
+    public static List<IndividualTestCase> generateNextGen(List<IndividualTestCase> population, String target) {
         List<IndividualTestCase> nextGen = new ArrayList<>();
         List<IndividualTestCase> Q1 = population.subList((int) Math.floor((population.size() - 1) * 0.75),
                 population.size() - 1);
@@ -276,6 +577,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         }
         nextGen.addAll(Q1);
         nextGen.addAll(Q3);
+        nextGen.forEach(individualTestCase -> individualTestCase.calcFitness(target));
         Collections.sort(nextGen);
         return nextGen;
     }

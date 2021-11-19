@@ -36,12 +36,10 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         Arrays.fill(this.targets, false);
     }
 
-    public void calculateFitness() {
-        String[] targets = {"t0", "t1", "t2", "t3", "t4", "t5"};
+    public void calculateFitness(String target) {
         this.isISBN13(this.testCase);
-        for (String target : targets) {
-            this.calcSingleTargetFitness(target);
-        }
+        this.calcSingleTargetFitness(target);
+
     }
 
     static double normalize(int d) {
@@ -93,18 +91,18 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
             case "t0":
                 break;
             case "t1":
-                this.fitness += this.t1();
+                this.fitness = this.t1();
                 break;
             case "t2":
-                this.fitness += this.t2();
+                this.fitness = this.t2();
                 break;
             case "t3":
                 break;
             case "t4":
-                this.fitness += this.t4();
+                this.fitness = this.t4();
                 break;
             case "t5":
-                this.fitness += this.t5();
+                this.fitness = this.t5();
                 break;
             default:
                 break;
@@ -118,7 +116,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         try {
             pre = Integer.parseInt(in.substring(0, 3));
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-            return false;
+
         }
         if (pre != 978) {
             //t1
@@ -133,15 +131,9 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
             this.targets[2] = true;
             return false;
         }
-        try {
-            long post = Long.parseLong(postStr);
-        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-            return false;
-        }
+        long post = Long.parseLong(postStr);
         int sum = 38;
         for (int x = 0; x < 10; x += 2) {
-            //t3
-            this.targets[3] = true;
             sum += (postStr.charAt(x) - 48) * 3 + ((postStr.charAt(x + 1) - 48));
         }
 
@@ -166,7 +158,7 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         return (int) random;
     }
 
-    static String generateSequence() {
+    public static String generateSequence() {
 
         StringBuilder sequence = new StringBuilder();
 //        sequence.append("978");
@@ -176,11 +168,11 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         return sequence.toString();
     }
 
-    public static List<IndividualTestCase> generatePopulation(int size) {
+    public static List<IndividualTestCase> generatePopulation(int size, String target) {
         List<IndividualTestCase> population = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             IndividualTestCase testCase = new IndividualTestCase(generateSequence());
-            testCase.calculateFitness();
+            testCase.calculateFitness(target);
             population.add(testCase);
         }
         Collections.sort(population);
@@ -205,14 +197,12 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         IndividualTestCase child2 = new IndividualTestCase(child2Str);
         child1.mutate();
         child2.mutate();
-        child1.calculateFitness();
-        child2.calculateFitness();
         children.add(child1);
         children.add(child2);
         return children;
     }
 
-    static List<IndividualTestCase> generateNextGen(List<IndividualTestCase> population) {
+    static List<IndividualTestCase> generateNextGen(List<IndividualTestCase> population, String target) {
         List<IndividualTestCase> nextGen = new ArrayList<>();
         List<IndividualTestCase> Q1 = population.subList((int) Math.floor((population.size() - 1) * 0.75),
                 population.size() - 1);
@@ -225,6 +215,9 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
         }
         nextGen.addAll(Q1);
         nextGen.addAll(Q3);
+        nextGen.forEach(individualTestCase -> {
+            individualTestCase.calculateFitness(target);
+        });
         Collections.sort(nextGen);
         return nextGen;
     }
@@ -233,6 +226,5 @@ public class IndividualTestCase implements Comparable<IndividualTestCase> {
     public int compareTo(IndividualTestCase o) {
         double x = o.fitness - this.fitness;
         return x > 0 ? 1 : x == 0 ? 0 : -1;
-//        return (int) (this.fitness - o.getFitness());
     }
 }
